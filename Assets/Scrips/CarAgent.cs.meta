@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 337e80f3d44864e4ba151b1c13b9d316
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - brain: {fileID: 11400000, guid: 5860d2a0ac990624b9724b721aea9b68, type: 2}
+  - Target: {instanceID: 0}
+  - frontDriverW: {instanceID: 0}
+  - frontPassengerW: {instanceID: 0}
+  - rearDriverW: {instanceID: 0}
+  - rearPassengerW: {instanceID: 0}
+  - frontDriverT: {instanceID: 0}
+  - frontPassengerT: {instanceID: 0}
+  - rearDriverT: {instanceID: 0}
+  - rearPassengerT: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
