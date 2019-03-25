@@ -13,7 +13,7 @@ public class CarAgent : Agent
     public float oldDistanceToTarget;
     public Vector3 directionToTarget;
     public Transform ground;
-    public int reward;
+    public int rewardMine;
 
     public GameObject[] SpawnPoints;
 
@@ -21,16 +21,17 @@ public class CarAgent : Agent
     public float[] barDistance;
     RaycastHit hit;
     public bool[] TargetBool;
+    public float[] TargetDis;
     public Vector3 dir;
 
 
 
-    public float velocityX;
-    public float velocityZ;
+    public float velocityMagnitude;
+    //public float velocityZ;
     private void FixedUpdate()
     {
-        velocityX = Mathf.Abs(rBody.velocity.x);
-        velocityZ = Mathf.Abs(rBody.velocity.z);
+        velocityMagnitude = Mathf.Round(rBody.velocity.sqrMagnitude * 100f) / 100f; 
+        //velocityZ = Mathf.Abs(rBody.velocity.z);
         Steer();
         Accelerate();
         UpdateWheelPoses();
@@ -57,7 +58,13 @@ public class CarAgent : Agent
 
         //}
         //ground.transform.position.x+
-        Target.position = SpawnPoints[Random.Range(0,8)].transform.position;
+        /*
+        Target.position = new Vector3(
+            ground.transform.position.x + Random.Range(-1.1f, 1.1f), 
+            ground.transform.position.y + 0.1f, 
+            ground.transform.position.z + Random.Range(-1.1f, 1.1f));
+            */
+        //Target.position = SpawnPoints[Random.Range(0,8)].transform.position;
 
     }
 
@@ -68,21 +75,23 @@ public class CarAgent : Agent
         //AddVectorObs(Target.position);
         //AddVectorObs(this.transform.position);
         AddVectorObs(distanceToTarget);
-        AddVectorObs(directionToTarget);
+        AddVectorObs(directionToTarget.x);
+        AddVectorObs(directionToTarget.z);
 
         //AddVectorObs(oldDistanceToTarget);
 
         // Agent velocity
-        AddVectorObs(rBody.velocity.x);
-        AddVectorObs(rBody.velocity.z);
-        CheckTargetForward();
-        AddVectorObs(TargetBool[2]);
-        for (int i = 0; i < 4; i++)
+        AddVectorObs(velocityMagnitude);
+        //AddVectorObs(rBody.velocity.z);
+        //CheckTargetForward();
+        //AddVectorObs(TargetBool[2]);
+        for (int i = 0; i < 6; i++)
         {
-            
+            CheckTargetAll(i);
             CheckTarget(i);
             AddVectorObs(barDistance[i]);
-            
+            AddVectorObs(TargetDis[i]);
+
         }
         
     }
@@ -107,7 +116,50 @@ public class CarAgent : Agent
             TargetBool[2] = false;
         }
     }
-    
+    private void CheckTargetAll(int i)
+    {
+        switch (i)
+        {
+            case 0:
+                dir = -casters[i].transform.right;
+                break;
+            case 1:
+                dir = casters[i].transform.right;
+                break;
+            case 2:
+                dir = casters[i].transform.forward;
+                break;
+            case 3:
+                dir = -casters[i].transform.forward;
+                break;
+            case 4:
+                dir = -casters[i].transform.right;
+                break;
+            case 5:
+                dir = casters[i].transform.right;
+                break;
+            default:
+                dir = -casters[i].transform.forward;
+                break;
+        }
+        if (Physics.Raycast(casters[i].transform.position, dir, out hit, 10))
+        {
+            if (hit.transform.gameObject.name == "Target")
+            {
+                TargetDis[i] = hit.distance;
+            }
+            else
+            {
+                TargetDis[i] = -1;
+            }
+
+        }
+        else
+        {
+            TargetDis[i] = -1;
+        }
+    }
+
     private void CheckTarget(int i)
     {
         switch (i)
@@ -123,6 +175,12 @@ public class CarAgent : Agent
                 break;
             case 3:
                 dir = -casters[i].transform.forward;
+                break;
+            case 4:
+                dir = -casters[i].transform.right;
+                break;
+            case 5:
+                dir = casters[i].transform.right;
                 break;
             default:
                 dir = -casters[i].transform.forward;
@@ -146,14 +204,7 @@ public class CarAgent : Agent
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if(collision.transform.tag == "Bar")
-        {
-            AddReward(-1f);
-            Done();
-        }
-    }
+   
 
 
 
@@ -260,8 +311,8 @@ public class CarAgent : Agent
 
         if (distanceToTarget < 0.3f)
         {
-            AddReward(1f);
-            reward += 100;
+            AddReward(5f);
+            rewardMine += 500;
             Done();
         }
         
@@ -269,49 +320,54 @@ public class CarAgent : Agent
         if (counter > 10)
         {
             
-            if (distanceToTarget < oldDistanceToTarget-0.02)
+            if (distanceToTarget < oldDistanceToTarget-0.01)
             {
                 AddReward(0.05f);
-                reward += 5;
+                rewardMine += 5;
                 // Done();
             }
             else
             {
-                AddReward(-0.05f);
-                reward -= 5;
+                AddReward(-0.06f);
+                rewardMine -= 6;
                 //Done();
             }
 
-            /*
-            if (velocityX  + velocityZ > 0.5)
+            
+            if (velocityMagnitude > 1)
             {
-                SetReward(0.1f);
-                reward += 1;
+                AddReward(0.2f);
+                rewardMine += 1;
             }
             
             else
             {
-                SetReward(-0.01f);
-                reward -= 1;
+                AddReward(-0.01f);
+                rewardMine -= 1;
             }
-         */
-            if (TargetBool[2])
+         
+            if (TargetDis[2] != -1)
+                {
+                    AddReward(0.03f);
+                rewardMine += 3;
+                }
+                
+                else if (TargetDis[0] != -1 || TargetDis[1] != -1)
                 {
                     AddReward(0.01f);
-                    reward += 1;
+                rewardMine += 1;
                 }
-                /*
-                else if (TargetBool[0] || TargetBool[1])
+                else if (TargetDis[4] != -1 || TargetDis[5] != -1)
                 {
-                    SetReward(0.05f);
-                    reward += 5;
+                    AddReward(0.02f);
+                    rewardMine += 2;
                 }
-                else if (TargetBool[3])
-                {
-                    SetReward(-0.05f);
-                    reward -= 5;
-                }
-                */
+                else if (TargetDis[3] != -1)
+                    {
+                        AddReward(-0.05f);
+                    rewardMine -= 5;
+                    }
+                
                 /*
             for(int i = 0; i < 4; i++)
             {
@@ -338,15 +394,24 @@ public class CarAgent : Agent
         /*
         if (this.transform.position.y < ground.transform.position.y - 1)
         {
-            AddReward(-1f);
-            reward -= 100;
+            AddReward(-5f);
+            rewardMine -= 100;
             Done();
         }
-
         */
+        
         
         //m_horizontalInput = 0;
         //m_verticalInput = 0;
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.transform.tag == "Bar")
+        {
+            AddReward(-0.5f);
+            rewardMine -= 50;
+            Done();
+        }
     }
 
 

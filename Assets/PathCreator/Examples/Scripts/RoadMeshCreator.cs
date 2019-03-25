@@ -6,6 +6,7 @@ namespace PathCreation.Examples
     public class RoadMeshCreator : PathSceneTool
     {
         [Header("Road settings")]
+        public int childcount; // Zero for Road ... 1 for left 2 for right
         public float roadWidth = .4f;
         [Range(0, .5f)]
         public float thickness = .15f;
@@ -116,7 +117,10 @@ namespace PathCreation.Examples
             // Find/creator mesh holder object in children
             //Transform meshHolder = transform.Find(meshHolderName);
             string meshHolderName = "Mesh Holder";
-            meshHolder = transform.Find(meshHolderName);
+            //meshHolder = transform.Find(meshHolderName); // My Edit
+            meshHolder = transform.GetChild(childcount);
+
+
             if (meshHolder == null)
             {
                 meshHolder = new GameObject(meshHolderName).transform;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CarLearningBrain
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 11
+    vectorObservationSize: 16
     numStackedVectorObservations: 1
     vectorActionSize: 0300000003000000
     cameraResolutions: []
