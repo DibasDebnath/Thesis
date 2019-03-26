@@ -86,34 +86,37 @@ public class CarAgent : Agent
     {
         // Target and Agent positions
         //AddVectorObs(Target.position);
-        //AddVectorObs(Target.position.x);
-        //AddVectorObs(Target.position.z);
+        AddVectorObs(Target.position.x);
+        AddVectorObs(Target.position.z);
         //AddVectorObs(this.transform.position);
-        //AddVectorObs(this.transform.position.x);
-        //AddVectorObs(this.transform.position.z);
+        AddVectorObs(this.transform.position.x);
+        AddVectorObs(this.transform.position.z);
 
         AddVectorObs(distanceToTarget);
-        directionVec.Set(directionToTarget.x, directionToTarget.z);// = new Vector2();
-        AddVectorObs(directionVec);
+       // directionVec.Set(directionToTarget.x, directionToTarget.z);// = new Vector2();
+        //AddVectorObs(directionVec);
         //AddVectorObs(directionToTarget.x);
         //AddVectorObs(directionToTarget.z);
 
         //AddVectorObs(oldDistanceToTarget);
 
         // Agent velocity
-        AddVectorObs(velocityMagnitude);
+        //AddVectorObs(velocityMagnitude);
+        AddVectorObs(vecDot);
+
         //AddVectorObs(rBody.velocity.z);
         //CheckTargetForward();
         //AddVectorObs(TargetBool[2]);
+        
         for (int i = 0; i < 6; i++)
         {
             CheckTargetAll(i);
             CheckBar(i);
             AddVectorObs(barDistance[i]);
-            AddVectorObs(TargetDis[i]);
+            //AddVectorObs(TargetDis[i]);
 
         }
-        
+        AddVectorObs(TargetDis[2]);
     }
     
     private void CheckTargetForward()
@@ -452,6 +455,11 @@ public class CarAgent : Agent
         {
            counter++;
         }
+
+        if(rewardMine < -3)
+        {
+           // Done();
+        }
         
         
 
@@ -489,6 +497,29 @@ public class CarAgent : Agent
          //   }
                 
             
+            //Done();
+        }
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.transform.tag == "Bar")
+        {
+            AddReward(-0.008f);
+            rewardMine -= 0.008f;
+            //    if (collideNo > 4)
+            //     {
+           // oldRewardMine = rewardMine;
+
+            //          collideNo = 0;
+            // Done();    // Change it for Apply Scene
+            //     }
+            //     else
+            //      {
+            //         collideNo += 1;
+            //        AgentReset();
+            //   }
+
+
             //Done();
         }
     }

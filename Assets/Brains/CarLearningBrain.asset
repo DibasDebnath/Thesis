@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: CarLearningBrain
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 16
+    vectorObservationSize: 13
     numStackedVectorObservations: 1
     vectorActionSize: 0300000003000000
     cameraResolutions: []
     vectorActionDescriptions:
-    - Gear
-    - Wheel
+    - 
+    - 
     vectorActionSpaceType: 0
   model: {fileID: 4900000, guid: 82bd20d18b8287a4483375c57a4852cb, type: 3}
