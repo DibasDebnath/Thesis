@@ -9,23 +9,35 @@ public class CarAgent : Agent
     Rigidbody rBody;
     Quaternion Q;
     Vector3 V;
+    [Header("Car Movement")]
     public float distanceToTarget;
     public float oldDistanceToTarget;
+    public float oldDistanceToTargetTwo;
+    public float vecDot;
+
+    Vector3 PosOfCar;
+    Vector3 oldPosOfCar;
+    Vector3 movement;
+    Vector3 fwd;
+
     public Vector3 directionToTarget;
     public Transform ground;
-    public int rewardMine;
+    [Header("Car Reward")]
+    public float rewardMine;
+    public float oldRewardMine;
+    public int targetReach;
 
+    [Header("Car Sensors")]
     public GameObject[] SpawnPoints;
-
     public GameObject[] casters;
     public float[] barDistance;
     RaycastHit hit;
     public bool[] TargetBool;
     public float[] TargetDis;
     public Vector3 dir;
+    Vector2 directionVec = new Vector2(0, 0);
 
-
-
+    public int collideNo;
     public float velocityMagnitude;
     //public float velocityZ;
     private void FixedUpdate()
@@ -54,6 +66,7 @@ public class CarAgent : Agent
             this.rBody.velocity = Vector3.zero;
             this.transform.position = V;// new Vector3(0, 0.5f, 0);
             this.transform.rotation = Q;
+        rewardMine = 0;
         //reward = 0;
 
         //}
@@ -73,10 +86,17 @@ public class CarAgent : Agent
     {
         // Target and Agent positions
         //AddVectorObs(Target.position);
+        //AddVectorObs(Target.position.x);
+        //AddVectorObs(Target.position.z);
         //AddVectorObs(this.transform.position);
+        //AddVectorObs(this.transform.position.x);
+        //AddVectorObs(this.transform.position.z);
+
         AddVectorObs(distanceToTarget);
-        AddVectorObs(directionToTarget.x);
-        AddVectorObs(directionToTarget.z);
+        directionVec.Set(directionToTarget.x, directionToTarget.z);// = new Vector2();
+        AddVectorObs(directionVec);
+        //AddVectorObs(directionToTarget.x);
+        //AddVectorObs(directionToTarget.z);
 
         //AddVectorObs(oldDistanceToTarget);
 
@@ -88,7 +108,7 @@ public class CarAgent : Agent
         for (int i = 0; i < 6; i++)
         {
             CheckTargetAll(i);
-            CheckTarget(i);
+            CheckBar(i);
             AddVectorObs(barDistance[i]);
             AddVectorObs(TargetDis[i]);
 
@@ -150,17 +170,17 @@ public class CarAgent : Agent
             }
             else
             {
-                TargetDis[i] = -1;
+                TargetDis[i] = 100;
             }
 
         }
         else
         {
-            TargetDis[i] = -1;
+            TargetDis[i] = 100;
         }
     }
 
-    private void CheckTarget(int i)
+    private void CheckBar(int i)
     {
         switch (i)
         {
@@ -194,13 +214,13 @@ public class CarAgent : Agent
             }
             else
             {
-                barDistance[i] = -1;
+                barDistance[i] = 100;
             }
 
         }
         else
         {
-            barDistance[i] = -1;
+            barDistance[i] = 100;
         }
     }
 
@@ -274,23 +294,25 @@ public class CarAgent : Agent
         /*
         if((m_verticalInput == 1 && m_horizontalInput == 1) || (m_verticalInput == 1 && m_horizontalInput == -1))
         {
-            SetReward(0.02f);
-            reward += 2;
+            AddReward(0.01f);
+            rewardMine += 0.01f;
         }
         else if (m_verticalInput == 1)
         {
-            SetReward(0.01f);
-            reward += 1;
+            AddReward(0.005f);
+            rewardMine += 0.005f;
         }
+        
         else if (m_verticalInput == -1)
         {
-            SetReward(-0.05f);
-            reward -= 5;
+            AddReward(-0.05f);
+            rewardMine -= 5;
         }
-        else if ((m_verticalInput == 0 && m_horizontalInput == 1) || (m_verticalInput == 0 && m_horizontalInput == -1))
+        
+        if ((m_verticalInput == 0 && m_horizontalInput == 1) || (m_verticalInput == 0 && m_horizontalInput == -1))
         {
-            SetReward(-1f);
-            reward -= 1;
+            AddReward(-1f);
+            rewardMine -= 100;
         }
         */
 
@@ -304,80 +326,123 @@ public class CarAgent : Agent
         distanceToTarget = Vector3.Distance(this.transform.position,
                                                   Target.position);
 
-        distanceToTarget = Mathf.Round(distanceToTarget * 100f) / 100f;
+        distanceToTarget = Mathf.Round(distanceToTarget * 1000f) / 1000f;
 
         directionToTarget = (Target.transform.position - this.transform.position).normalized;
         // Reached target
 
-        if (distanceToTarget < 0.3f)
-        {
-            AddReward(5f);
-            rewardMine += 500;
-            Done();
-        }
-        
-        
-        if (counter > 10)
+        if (counterTwo > 100)
         {
             
-            if (distanceToTarget < oldDistanceToTarget-0.01)
+            if (distanceToTarget < oldDistanceToTargetTwo - 0.02f)
             {
-                AddReward(0.05f);
-                rewardMine += 5;
+              //  AddReward(0.03f);
+              //  rewardMine += 0.03f;
                 // Done();
             }
             else
             {
-                AddReward(-0.06f);
-                rewardMine -= 6;
+                AddReward(-0.8f);
+                rewardMine -= 0.8f;
                 //Done();
             }
+            oldDistanceToTargetTwo = distanceToTarget;
+            counterTwo = 0;
+        }
+        else
+        {
+            counterTwo++;
+        }
 
-            
-            if (velocityMagnitude > 1)
+
+
+
+
+
+            if (counter > 10)
+        {
+            /*
+            if (distanceToTarget < oldDistanceToTarget-0.02f)
             {
-                AddReward(0.2f);
-                rewardMine += 1;
+                AddReward(0.03f);
+                rewardMine += 0.03f;
+                // Done();
+            }
+            else
+            {
+                AddReward(-0.03f);
+                rewardMine -= 0.03f;
+                //Done();
+            }
+            */
+            PosOfCar = this.transform.position;
+            movement = PosOfCar - oldPosOfCar;
+            fwd = this.transform.forward;
+            vecDot = Vector3.Dot(fwd, movement);
+            if (vecDot > 0.15)
+            {
+                AddReward(0.06f);
+                rewardMine += 0.06f;
+                // Done();
+            }
+            else
+            {
+                AddReward(-0.08f);
+                rewardMine -= 0.08f;
+                //Done();
+            }
+            oldPosOfCar = PosOfCar;
+
+            /*
+            if (velocityMagnitude > 1f)
+            {
+                AddReward(0.02f);
+                rewardMine += 0.02f;
             }
             
             else
             {
                 AddReward(-0.01f);
+                rewardMine -= 0.01f;
+            }
+            */
+                if (TargetDis[2] != 100)
+                {
+                    AddReward(0.1f);
+                rewardMine += 0.1f;
+                }
+            /*  
+              else if (TargetDis[0] != 100 || TargetDis[1] != 100)
+              {
+                  AddReward(0.01f);
+                  rewardMine += 1;
+              }
+              else if (TargetDis[4] != 100 || TargetDis[5] != 100)
+              {
+                  AddReward(0.05f);
+                  rewardMine += 5;
+              }
+              else if (TargetDis[3] != 100)
+                  {
+                //      AddReward(-0.05f);
+               //   rewardMine -= 5;
+                  }
+              */
+            /*
+        for(int i = 0; i < 6; i++)
+        {
+            if (barDistance[i] > 0.2f)
+            {
+                AddReward(0.01f);
+                rewardMine += 1;
+            }
+            else
+            {
+                AddReward(-0.01f);
                 rewardMine -= 1;
             }
-         
-            if (TargetDis[2] != -1)
-                {
-                    AddReward(0.03f);
-                rewardMine += 3;
-                }
-                
-                else if (TargetDis[0] != -1 || TargetDis[1] != -1)
-                {
-                    AddReward(0.01f);
-                rewardMine += 1;
-                }
-                else if (TargetDis[4] != -1 || TargetDis[5] != -1)
-                {
-                    AddReward(0.02f);
-                    rewardMine += 2;
-                }
-                else if (TargetDis[3] != -1)
-                    {
-                        AddReward(-0.05f);
-                    rewardMine -= 5;
-                    }
-                
-                /*
-            for(int i = 0; i < 4; i++)
-            {
-                if (castershit[i] == false)
-                {
-                    SetReward(-0.1f);
-                    reward -= 10;
-                }
-            }
-                */
+        }
+            */
 
             oldDistanceToTarget = distanceToTarget;
         
@@ -408,10 +473,45 @@ public class CarAgent : Agent
     {
         if (collision.transform.tag == "Bar")
         {
-            AddReward(-0.5f);
-            rewardMine -= 50;
-            Done();
+            AddReward(-1f);
+            rewardMine -= 1f;
+        //    if (collideNo > 4)
+       //     {
+                oldRewardMine = rewardMine;
+                
+      //          collideNo = 0;
+               // Done();    // Change it for Apply Scene
+       //     }
+       //     else
+      //      {
+       //         collideNo += 1;
+        //        AgentReset();
+         //   }
+                
+            
+            //Done();
         }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.name == "Target")
+        {
+            AddReward(5f);
+            rewardMine += 5f;
+            //   if(targetReach > 1)
+            //    {
+            oldRewardMine = rewardMine;
+
+            Done();
+            //    }
+            //    else
+            //    {
+                    targetReach += 1;
+            //       AgentReset();
+            //  }
+        }
+
+
     }
 
 
@@ -427,8 +527,7 @@ public class CarAgent : Agent
 
 
 
-
-    public void GetInput()
+        public void GetInput()
     {
         m_horizontalInput = Input.GetAxis("Horizontal");
         m_verticalInput = Input.GetAxis("Vertical");
@@ -469,8 +568,9 @@ public class CarAgent : Agent
         _transform.rotation = _quat;
     }
 
-
+    [Header("Car Inputs")]
     public int counter = 0;
+    public int counterTwo = 0;
     public float m_horizontalInput;
     public float m_verticalInput;
     private float m_steeringAngle;
