@@ -458,7 +458,7 @@ public class CarAgent : Agent
 
         if(rewardMine < -3)
         {
-           // Done();
+           Done();
         }
         
         

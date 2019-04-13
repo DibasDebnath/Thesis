@@ -12,7 +12,7 @@ namespace MLAgents
     public class BCTeacherHelper : MonoBehaviour
     {
 
-        bool recordExperiences;
+        public bool recordExperiences;
         bool resetBuffer;
         Agent myAgent;
         float bufferResetTime;
