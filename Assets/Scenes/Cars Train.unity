@@ -3138,11 +3138,6 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 1814953693}
-    - target: {fileID: 8062019737504011363, guid: b88a9ddf85e976f4eb0d1e9d94130e6c,
-        type: 3}
-      propertyPath: agentParameters.numberOfActionsBetweenDecisions
-      value: 5
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b88a9ddf85e976f4eb0d1e9d94130e6c, type: 3}
 --- !u!33 &7680919754949204006

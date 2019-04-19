@@ -26,6 +26,8 @@ public class CarAgent : Agent
     public float rewardMine;
     public float oldRewardMine;
     public int targetReach;
+    public float Timer;
+    public float OldTimer;
 
     [Header("Car Sensors")]
     public GameObject[] SpawnPoints;
@@ -48,6 +50,10 @@ public class CarAgent : Agent
         Accelerate();
         UpdateWheelPoses();
     }
+    private void Update()
+    {
+        Timer += Time.deltaTime;
+    }
 
     public void Start()
     {
@@ -67,6 +73,7 @@ public class CarAgent : Agent
             this.transform.position = V;// new Vector3(0, 0.5f, 0);
             this.transform.rotation = Q;
         rewardMine = 0;
+        Timer = 0;
         //reward = 0;
 
         //}
@@ -110,12 +117,13 @@ public class CarAgent : Agent
         
         for (int i = 0; i < 6; i++)
         {
-            CheckTargetAll(i);
+            //CheckTargetAll(i);
             CheckBar(i);
             AddVectorObs(barDistance[i]);
             //AddVectorObs(TargetDis[i]);
 
         }
+        CheckTargetAll(2);
         AddVectorObs(TargetDis[2]);
     }
     
@@ -345,8 +353,8 @@ public class CarAgent : Agent
             }
             else
             {
-                AddReward(-0.8f);
-                rewardMine -= 0.8f;
+                AddReward(-1f);
+                rewardMine -= 1f;
                 //Done();
             }
             oldDistanceToTargetTwo = distanceToTarget;
@@ -382,10 +390,29 @@ public class CarAgent : Agent
             movement = PosOfCar - oldPosOfCar;
             fwd = this.transform.forward;
             vecDot = Vector3.Dot(fwd, movement);
-            if (vecDot > 0.15)
+
+            if (vecDot > 0.3)
             {
                 AddReward(0.06f);
                 rewardMine += 0.06f;
+                // Done();
+            }
+            else if (vecDot > 0.25)
+            {
+                AddReward(0.05f);
+                rewardMine += 0.05f;
+                // Done();
+            }
+            else if (vecDot > 0.20)
+            {
+                AddReward(0.03f);
+                rewardMine += 0.03f;
+                // Done();
+            }
+            else if (vecDot > 0.15)
+            {
+                AddReward(0.02f);
+                rewardMine += 0.02f;
                 // Done();
             }
             else
@@ -431,21 +458,21 @@ public class CarAgent : Agent
                //   rewardMine -= 5;
                   }
               */
-            /*
+            
         for(int i = 0; i < 6; i++)
         {
             if (barDistance[i] > 0.2f)
             {
-                AddReward(0.01f);
-                rewardMine += 1;
+                AddReward(0.02f);
+                rewardMine += 0.02f;
             }
             else
             {
-                AddReward(-0.01f);
-                rewardMine -= 1;
+                AddReward(-0.02f);
+                rewardMine -= 0.02f;
             }
         }
-            */
+            
 
             oldDistanceToTarget = distanceToTarget;
         
@@ -456,9 +483,11 @@ public class CarAgent : Agent
            counter++;
         }
 
-        if(rewardMine < -3)
+        if(Timer > 60)
         {
-           Done();
+            OldTimer = Timer;
+            oldRewardMine = rewardMine;
+            Done();
         }
         
         
@@ -481,11 +510,11 @@ public class CarAgent : Agent
     {
         if (collision.transform.tag == "Bar")
         {
-            AddReward(-1f);
-            rewardMine -= 1f;
+            AddReward(-0.5f);
+            rewardMine -= 0.5f;
         //    if (collideNo > 4)
        //     {
-                oldRewardMine = rewardMine;
+                //oldRewardMine = rewardMine;
                 
       //          collideNo = 0;
                // Done();    // Change it for Apply Scene
@@ -532,7 +561,7 @@ public class CarAgent : Agent
             //   if(targetReach > 1)
             //    {
             oldRewardMine = rewardMine;
-
+            OldTimer = Timer;
             Done();
             //    }
             //    else
