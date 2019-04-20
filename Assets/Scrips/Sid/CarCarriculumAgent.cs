@@ -31,8 +31,6 @@ public class CarCarriculumAgent : Agent
     public float rewardMine;
     public float oldRewardMine;
     public int targetReach;
-    public float Timer;
-    public float OldTimer;
 
     [Header("Car Sensors")]
     public GameObject[] SpawnPoints;
@@ -55,10 +53,6 @@ public class CarCarriculumAgent : Agent
         Accelerate();
         UpdateWheelPoses();
     }
-    private void Update()
-    {
-        Timer += Time.deltaTime;
-    }
 
     public void Start()
     {
@@ -70,10 +64,6 @@ public class CarCarriculumAgent : Agent
     }
     public Transform Target;
 
-
-
-    
-
     public override void AgentReset()
     {
         //if (this.transform.position.y < -1)
@@ -84,7 +74,6 @@ public class CarCarriculumAgent : Agent
         this.transform.position = V;// new Vector3(0, 0.5f, 0);
         this.transform.rotation = Q;
         rewardMine = 0;
-        Timer = 0;
         //reward = 0;
         for (int i = 0; i < 5; i++)
         {
@@ -108,11 +97,11 @@ public class CarCarriculumAgent : Agent
     {
         // Target and Agent positions
         //AddVectorObs(Target.position);
-        //AddVectorObs(Target.position.x);
-        //AddVectorObs(Target.position.z);
+        AddVectorObs(Target.position.x);
+        AddVectorObs(Target.position.z);
         //AddVectorObs(this.transform.position);
-        //AddVectorObs(this.transform.position.x);
-        //AddVectorObs(this.transform.position.z);
+        AddVectorObs(this.transform.position.x);
+        AddVectorObs(this.transform.position.z);
 
         AddVectorObs(distanceToTarget);
         // directionVec.Set(directionToTarget.x, directionToTarget.z);// = new Vector2();
@@ -132,13 +121,12 @@ public class CarCarriculumAgent : Agent
 
         for (int i = 0; i < 6; i++)
         {
-            //CheckTargetAll(i);
+            CheckTargetAll(i);
             CheckBar(i);
             AddVectorObs(barDistance[i]);
             //AddVectorObs(TargetDis[i]);
 
         }
-        CheckTargetAll(2);
         AddVectorObs(TargetDis[2]);
     }
 
@@ -368,8 +356,8 @@ public class CarCarriculumAgent : Agent
             }
             else
             {
-                AddReward(-1f);
-                rewardMine -= 1f;
+                AddReward(-0.8f);
+                rewardMine -= 0.8f;
                 //Done();
             }
             oldDistanceToTargetTwo = distanceToTarget;
@@ -405,29 +393,10 @@ public class CarCarriculumAgent : Agent
             movement = PosOfCar - oldPosOfCar;
             fwd = this.transform.forward;
             vecDot = Vector3.Dot(fwd, movement);
-
-            if (vecDot > 0.3)
+            if (vecDot > 0.15)
             {
                 AddReward(0.06f);
                 rewardMine += 0.06f;
-                // Done();
-            }
-            else if (vecDot > 0.25)
-            {
-                AddReward(0.05f);
-                rewardMine += 0.05f;
-                // Done();
-            }
-            else if (vecDot > 0.20)
-            {
-                AddReward(0.03f);
-                rewardMine += 0.03f;
-                // Done();
-            }
-            else if (vecDot > 0.15)
-            {
-                AddReward(0.02f);
-                rewardMine += 0.02f;
                 // Done();
             }
             else
@@ -473,21 +442,21 @@ public class CarCarriculumAgent : Agent
                //   rewardMine -= 5;
                   }
               */
-
-            for (int i = 0; i < 6; i++)
+            /*
+        for(int i = 0; i < 6; i++)
+        {
+            if (barDistance[i] > 0.2f)
             {
-                if (barDistance[i] > 0.2f)
-                {
-                    AddReward(0.02f);
-                    rewardMine += 0.02f;
-                }
-                else
-                {
-                    AddReward(-0.02f);
-                    rewardMine -= 0.02f;
-                }
+                AddReward(0.01f);
+                rewardMine += 1;
             }
-
+            else
+            {
+                AddReward(-0.01f);
+                rewardMine -= 1;
+            }
+        }
+            */
 
             oldDistanceToTarget = distanceToTarget;
 
@@ -498,10 +467,8 @@ public class CarCarriculumAgent : Agent
             counter++;
         }
 
-        if (Timer > 60)
+        if (rewardMine < -3)
         {
-            OldTimer = Timer;
-            oldRewardMine = rewardMine;
             Done();
         }
 
@@ -525,11 +492,11 @@ public class CarCarriculumAgent : Agent
     {
         if (collision.transform.tag == "Bar")
         {
-            AddReward(-0.5f);
-            rewardMine -= 0.5f;
+            AddReward(-1f);
+            rewardMine -= 1f;
             //    if (collideNo > 4)
             //     {
-            //oldRewardMine = rewardMine;
+            oldRewardMine = rewardMine;
 
             //          collideNo = 0;
             // Done();    // Change it for Apply Scene
@@ -576,9 +543,8 @@ public class CarCarriculumAgent : Agent
             //   if(targetReach > 1)
             //    {
             oldRewardMine = rewardMine;
-            OldTimer = Timer;
 
-            if (oldRewardMine > 14)
+            if(oldRewardMine > 8)
             {
                 RoadSelected++;
                 if (RoadSelected > 4)

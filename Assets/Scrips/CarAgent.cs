@@ -14,13 +14,11 @@ public class CarAgent : Agent
     public float oldDistanceToTarget;
     public float oldDistanceToTargetTwo;
     public float vecDot;
-    
 
     Vector3 PosOfCar;
     Vector3 oldPosOfCar;
     Vector3 movement;
     Vector3 fwd;
-    
 
     public Vector3 directionToTarget;
     public Transform ground;
@@ -33,7 +31,7 @@ public class CarAgent : Agent
 
     [Header("Car Sensors")]
     public GameObject[] SpawnPoints;
-    public GameObject[] casters;   
+    public GameObject[] casters;
     public float[] barDistance;
     RaycastHit hit;
     public bool[] TargetBool;
@@ -55,11 +53,7 @@ public class CarAgent : Agent
     private void Update()
     {
         Timer += Time.deltaTime;
-        
-        
     }
-
-    
 
     public void Start()
     {
@@ -68,12 +62,6 @@ public class CarAgent : Agent
         V = this.transform.position;
     }
     public Transform Target;
-
-
-
-    
-
-
 
     public override void AgentReset()
     {
@@ -185,7 +173,7 @@ public class CarAgent : Agent
                 dir = -casters[i].transform.forward;
                 break;
         }
-        if (Physics.SphereCast(casters[i].transform.position,0f, dir, out hit, 10))
+        if (Physics.Raycast(casters[i].transform.position, dir, out hit, 10))
         {
             if (hit.transform.gameObject.name == "Target")
             {
@@ -229,7 +217,7 @@ public class CarAgent : Agent
                 dir = -casters[i].transform.forward;
                 break;
         }
-        if (Physics.SphereCast(casters[i].transform.position,0f, dir, out hit, 10))
+        if (Physics.Raycast(casters[i].transform.position, dir, out hit, 10))
         {
             if (hit.transform.gameObject.tag == "Bar")
             {
@@ -246,7 +234,6 @@ public class CarAgent : Agent
             barDistance[i] = 100;
         }
     }
-    
 
    
 
@@ -481,8 +468,8 @@ public class CarAgent : Agent
             }
             else
             {
-                AddReward(-0.04f);
-                rewardMine -= 0.04f;
+                AddReward(-0.02f);
+                rewardMine -= 0.02f;
             }
         }
             
@@ -523,8 +510,8 @@ public class CarAgent : Agent
     {
         if (collision.transform.tag == "Bar")
         {
-            AddReward(-0.8f);
-            rewardMine -= 0.8f;
+            AddReward(-0.5f);
+            rewardMine -= 0.5f;
         //    if (collideNo > 4)
        //     {
                 //oldRewardMine = rewardMine;
